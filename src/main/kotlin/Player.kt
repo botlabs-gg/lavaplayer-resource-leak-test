@@ -9,7 +9,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackState
 import com.sun.org.slf4j.internal.LoggerFactory
 
 
-class Player(val track: AudioTrack, val apm: DefaultAudioPlayerManager) : AudioEventAdapter() {
+class Player(val track: AudioTrack, apm: DefaultAudioPlayerManager, val isRepeating: Boolean = true) : AudioEventAdapter() {
     private val player: AudioPlayer = apm.createPlayer()
 
     init {
@@ -21,10 +21,10 @@ class Player(val track: AudioTrack, val apm: DefaultAudioPlayerManager) : AudioE
     }
 
     override fun onTrackEnd(player: AudioPlayer, track: AudioTrack, endReason: AudioTrackEndReason) {
-        player.playTrack(track)
+        if (isRepeating) player.playTrack(track)
     }
 
-    fun canProvide(): Boolean {
+    fun tryProvide(): Boolean {
         val state: AudioTrackState
         try {
             state = player.playingTrack.state
