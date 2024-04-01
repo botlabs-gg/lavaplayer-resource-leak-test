@@ -10,6 +10,7 @@ repositories {
 }
 
 dependencies {
+    implementation("dev.arbjerg:lavaplayer:2.0.1")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
 
