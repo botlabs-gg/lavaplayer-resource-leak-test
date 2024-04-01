@@ -12,7 +12,7 @@ class PlaylistLoader(val apm: AudioPlayerManager) : AudioLoadResultHandler {
     private val results: MutableList<AudioTrack> = mutableListOf()
     private val latch = CountDownLatch(1)
 
-    fun loadTracksSync(identifier: String): List<AudioTrack>? {
+    fun loadTracksSync(identifier: String): List<AudioTrack> {
         apm.loadItem(identifier, this)
         latch.await()
         exception?.let { throw it }

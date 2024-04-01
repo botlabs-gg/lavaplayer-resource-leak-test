@@ -6,22 +6,21 @@ import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackState
-import com.sun.org.slf4j.internal.LoggerFactory
-
 
 class Player(val track: AudioTrack, apm: DefaultAudioPlayerManager, val isRepeating: Boolean = true) : AudioEventAdapter() {
     private val player: AudioPlayer = apm.createPlayer()
+    val consumer = AudioConsumer(this)
 
     init {
         player.addListener(this)
         player.playTrack(track)
-
-        val consumer = AudioConsumer(this)
         consumer.start()
     }
 
     override fun onTrackEnd(player: AudioPlayer, track: AudioTrack, endReason: AudioTrackEndReason) {
-        if (isRepeating) player.playTrack(track)
+        println("Track ended: $endReason")
+        if (endReason == AudioTrackEndReason.STOPPED) return
+        if (isRepeating) player.playTrack(track.makeClone())
     }
 
     fun tryProvide(): Boolean {
@@ -29,7 +28,6 @@ class Player(val track: AudioTrack, apm: DefaultAudioPlayerManager, val isRepeat
         try {
             state = player.playingTrack.state
         } catch (ex: NullPointerException) {
-            player.playTrack(track)
             return false
         }
 
@@ -40,7 +38,8 @@ class Player(val track: AudioTrack, apm: DefaultAudioPlayerManager, val isRepeat
         return player.provide() != null
     }
 
-    companion object {
-        private val log = LoggerFactory.getLogger(Player::class.java)
+    fun destroy() {
+        player.destroy()
+        consumer.interrupt()
     }
 }
