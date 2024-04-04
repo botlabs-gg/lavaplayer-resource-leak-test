@@ -2,6 +2,7 @@ package gg.botlabs
 
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers
+import java.util.concurrent.Executors
 
 object Main
 
@@ -14,18 +15,13 @@ fun main() {
     AudioSourceManagers.registerRemoteSources(apm)
     val track = PlaylistLoader(apm).loadTracksSync(identifier).first()
 
-    val players = mutableListOf<Player>()
-    repeat(200) {
+    val executor = Executors.newCachedThreadPool()
+    repeat(1000) {
         Thread.sleep(10)
+        val player = Player(track.makeClone(), apm, false)
+        executor.submit { player.destroy() }
         println(it)
-        players.add(Player(track.makeClone(), apm, false))
     }
 
-    Thread.sleep(5000)
-    players.forEach {
-        it.destroy()
-    }
-
-    println("Players destroyed")
     Thread.sleep(Long.MAX_VALUE)
 }
